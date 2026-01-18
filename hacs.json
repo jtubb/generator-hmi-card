@@ -1,6 +1,5 @@
 {
   "name": "Generator HMI Card",
-  "description": "ISA-101 compliant HMI card for Genmon generator monitoring",
   "render_readme": true,
   "filename": "generator-hmi-card.js",
   "content_in_root": true
