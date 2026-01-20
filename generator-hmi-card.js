@@ -200,14 +200,14 @@ class GeneratorHMICard extends HTMLElement {
 
     // Simple values
     this._updateSimpleValue('rpm', this._getState('rpm'));
-    this._updateSimpleValue('run-hours', this._getState('total_run_hours'));
+    this._updateSimpleValue('run-hours', this._getState('maintenance_service_total_run_hours'));
 
     // Maintenance indicators
     if (this._config.show_maintenance) {
-      this._updateMaintenanceIndicator('oil', this._getMaintenanceStatus(this._getState('oil_and_filter_service_due')));
-      this._updateMaintenanceIndicator('air-filter', this._getMaintenanceStatus(this._getState('air_filter_service_due')));
-      this._updateMaintenanceIndicator('spark-plug', this._getMaintenanceStatus(this._getState('spark_plug_service_due')));
-      this._updateMaintenanceIndicator('battery-svc', this._getMaintenanceStatus(this._getState('battery_check_due')));
+      this._updateMaintenanceIndicator('oil', this._getMaintenanceStatus(this._getState('oil_service')));
+      this._updateMaintenanceIndicator('air-filter', this._getMaintenanceStatus(this._getState('air_filter_service')));
+      this._updateMaintenanceIndicator('spark-plug', this._getMaintenanceStatus(this._getState('spark_plug_service')));
+      this._updateMaintenanceIndicator('battery-svc', this._getMaintenanceStatus(this._getState('battery_service')));
     }
 
     // Update button states based on running status
