@@ -6,7 +6,7 @@
  * @author Claude Code
  */
 
-const CARD_VERSION = '2.2.0';
+const CARD_VERSION = '2.2.2';
 
 console.info(
   `%c GENERATOR-HMI-CARD %c v${CARD_VERSION} %c ISA-101 `,
