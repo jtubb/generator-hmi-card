@@ -6,7 +6,7 @@
  * @author Claude Code
  */
 
-const CARD_VERSION = '2.3.0';
+const CARD_VERSION = '2.3.1';
 
 console.info(
   `%c GENERATOR-HMI-CARD %c v${CARD_VERSION} %c ISA-101 `,
@@ -633,7 +633,7 @@ class GeneratorHMICard extends HTMLElement {
                   <span>${this._config.voltage_max}</span>
                 </div>
               </div>
-              <div class="analog-item clickable" data-entity="frequency">
+              <div class="analog-item clickable" data-entity="output_frequency">
                 <div class="analog-label">Frequency</div>
                 <div class="analog-container" id="frequency-container">
                   <div class="analog-bar-fill level-0" id="frequency-bar" style="width: 0%"></div>
@@ -677,19 +677,19 @@ class GeneratorHMICard extends HTMLElement {
           <div class="maint-section">
             <div class="maint-title">Maintenance Status</div>
             <div class="maint-grid">
-              <div class="maint-item">
+              <div class="maint-item clickable" data-entity="oil_and_filter_service_due">
                 <div class="maint-label">Oil</div>
                 <span class="maint-indicator level-0" id="oil-indicator"><span id="oil-status">--</span></span>
               </div>
-              <div class="maint-item">
+              <div class="maint-item clickable" data-entity="air_filter_service_due">
                 <div class="maint-label">Air Filter</div>
                 <span class="maint-indicator level-0" id="air-filter-indicator"><span id="air-filter-status">--</span></span>
               </div>
-              <div class="maint-item">
+              <div class="maint-item clickable" data-entity="spark_plug_service_due">
                 <div class="maint-label">Spark Plug</div>
                 <span class="maint-indicator level-0" id="spark-plug-indicator"><span id="spark-plug-status">--</span></span>
               </div>
-              <div class="maint-item">
+              <div class="maint-item clickable" data-entity="battery_service_due">
                 <div class="maint-label">Battery</div>
                 <span class="maint-indicator level-0" id="battery-svc-indicator"><span id="battery-svc-status">--</span></span>
               </div>
