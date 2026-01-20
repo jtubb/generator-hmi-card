@@ -6,7 +6,7 @@
  * @author Claude Code
  */
 
-const CARD_VERSION = '2.2.2';
+const CARD_VERSION = '2.3.0';
 
 console.info(
   `%c GENERATOR-HMI-CARD %c v${CARD_VERSION} %c ISA-101 `,
@@ -98,6 +98,16 @@ class GeneratorHMICard extends HTMLElement {
     if (confirm(confirmText)) {
       this._hass.callService('button', 'press', { entity_id: buttonEntity });
     }
+  }
+
+  _showMoreInfo(entitySuffix) {
+    const entityId = this._config.entity_prefix + entitySuffix;
+    const event = new CustomEvent('hass-more-info', {
+      bubbles: true,
+      composed: true,
+      detail: { entityId }
+    });
+    this.dispatchEvent(event);
   }
 
   // ISA-101: Determine status level (0=normal, 1=abnormal, 2=warning, 3=alarm)
@@ -200,7 +210,7 @@ class GeneratorHMICard extends HTMLElement {
 
     // Simple values
     this._updateSimpleValue('rpm', this._getState('rpm'));
-    this._updateSimpleValue('run-hours', this._getState('maintenance_service_total_run_hours'));
+    this._updateSimpleValue('run-hours', this._getState('total_run_hours'));
 
     // Maintenance indicators
     if (this._config.show_maintenance) {
@@ -428,6 +438,17 @@ class GeneratorHMICard extends HTMLElement {
           margin-top: 1px;
         }
         
+        /* Clickable elements */
+        .clickable {
+          cursor: pointer;
+        }
+        .clickable:hover {
+          filter: brightness(0.95);
+        }
+        .clickable:active {
+          filter: brightness(0.9);
+        }
+
         /* Simple Values */
         .values-row {
           display: flex;
@@ -565,19 +586,19 @@ class GeneratorHMICard extends HTMLElement {
 
           <!-- Primary Status -->
           <div class="status-row">
-            <div class="status-block">
+            <div class="status-block clickable" data-entity="engine_state">
               <div class="status-label">Engine</div>
               <span class="status-indicator level-0" id="engine-indicator">
                 <span id="engine-status">--</span>
               </span>
             </div>
-            <div class="status-block">
+            <div class="status-block clickable" data-entity="outage_status">
               <div class="status-label">Utility</div>
               <span class="status-indicator level-0" id="outage-indicator">
                 <span id="outage-status">--</span>
               </span>
             </div>
-            <div class="status-block">
+            <div class="status-block clickable" data-entity="switch_state">
               <div class="status-label">Load Source</div>
               <span class="status-indicator level-0" id="switch-indicator">
                 <span id="switch-status">--</span>
@@ -588,7 +609,7 @@ class GeneratorHMICard extends HTMLElement {
           <!-- Analog Indicators -->
           <div class="analog-section">
             <div class="analog-grid">
-              <div class="analog-item">
+              <div class="analog-item clickable" data-entity="output_voltage">
                 <div class="analog-label">Output Voltage</div>
                 <div class="analog-container" id="output-voltage-container">
                   <div class="analog-bar-fill level-0" id="output-voltage-bar" style="width: 0%"></div>
@@ -600,7 +621,7 @@ class GeneratorHMICard extends HTMLElement {
                   <span>${this._config.voltage_max}</span>
                 </div>
               </div>
-              <div class="analog-item">
+              <div class="analog-item clickable" data-entity="utility_voltage">
                 <div class="analog-label">Utility Voltage</div>
                 <div class="analog-container" id="utility-voltage-container">
                   <div class="analog-bar-fill level-0" id="utility-voltage-bar" style="width: 0%"></div>
@@ -612,7 +633,7 @@ class GeneratorHMICard extends HTMLElement {
                   <span>${this._config.voltage_max}</span>
                 </div>
               </div>
-              <div class="analog-item">
+              <div class="analog-item clickable" data-entity="frequency">
                 <div class="analog-label">Frequency</div>
                 <div class="analog-container" id="frequency-container">
                   <div class="analog-bar-fill level-0" id="frequency-bar" style="width: 0%"></div>
@@ -624,7 +645,7 @@ class GeneratorHMICard extends HTMLElement {
                   <span>${this._config.frequency_max}</span>
                 </div>
               </div>
-              <div class="analog-item">
+              <div class="analog-item clickable" data-entity="battery_voltage">
                 <div class="analog-label">Battery</div>
                 <div class="analog-container" id="battery-container">
                   <div class="analog-bar-fill level-0" id="battery-bar" style="width: 0%"></div>
@@ -641,11 +662,11 @@ class GeneratorHMICard extends HTMLElement {
 
           <!-- Simple Values -->
           <div class="values-row">
-            <div class="value-block">
+            <div class="value-block clickable" data-entity="rpm">
               <div class="value-label">RPM</div>
               <div class="value-display"><span id="rpm">--</span></div>
             </div>
-            <div class="value-block">
+            <div class="value-block clickable" data-entity="total_run_hours">
               <div class="value-label">Run Hours</div>
               <div class="value-display"><span id="run-hours">--</span></div>
             </div>
@@ -722,6 +743,13 @@ class GeneratorHMICard extends HTMLElement {
         });
       });
     }
+
+    // Add click handlers for sensor more-info dialogs
+    this.shadowRoot.querySelectorAll('.clickable[data-entity]').forEach((el) => {
+      el.addEventListener('click', () => {
+        this._showMoreInfo(el.dataset.entity);
+      });
+    });
 
     this._updateValues();
   }
