@@ -120,8 +120,10 @@ class GeneratorHMICard extends HTMLElement {
   }
 
   _getOutageStatus() {
-    const state = this._getState('outage_status').toLowerCase();
-    if (state.includes('outage') && !state.includes('no')) return { level: 3, text: 'OUTAGE' };
+    const state = this._getState('system_in_outage').toLowerCase();
+    if (state === 'yes' || state === 'true' || state === 'on' || (state.includes('outage') && !state.includes('no'))) {
+      return { level: 3, text: 'OUTAGE' };
+    }
     return { level: 0, text: 'NORMAL' };
   }
 
@@ -592,7 +594,7 @@ class GeneratorHMICard extends HTMLElement {
                 <span id="engine-status">--</span>
               </span>
             </div>
-            <div class="status-block clickable" data-entity="outage_status">
+            <div class="status-block clickable" data-entity="system_in_outage">
               <div class="status-label">Utility</div>
               <span class="status-indicator level-0" id="outage-indicator">
                 <span id="outage-status">--</span>

@@ -90,7 +90,7 @@ This card expects entities from the Genmon Home Assistant integration. With `dev
 
 ### Sensors
 - `sensor.generator_engine_state` - Engine running state
-- `sensor.generator_outage_status` - Utility outage status
+- `sensor.generator_system_in_outage` - Utility outage status
 - `sensor.generator_switch_state` - Transfer switch position
 - `sensor.generator_output_voltage` - Generator output voltage
 - `sensor.generator_utility_voltage` - Utility input voltage
