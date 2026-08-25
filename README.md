@@ -61,6 +61,7 @@ show_maintenance: true
 | `device_name` | string | `generator` | Device name as configured in Genmon (used to build entity IDs) |
 | `entity_prefix` | string | auto | Override sensor entity prefix (e.g., `sensor.my_gen_`) |
 | `button_prefix` | string | auto | Override button entity prefix (e.g., `button.my_gen_`) |
+| `entities` | map | – | Per-entity overrides for non-standard names (see below) |
 | `show_controls` | boolean | `true` | Show control buttons |
 | `show_maintenance` | boolean | `true` | Show maintenance status |
 | `voltage_nominal` | number | `240` | Nominal voltage for bar display |
@@ -72,6 +73,32 @@ show_maintenance: true
 | `battery_nominal` | number | `13.2` | Nominal battery voltage |
 | `battery_min` | number | `11.5` | Minimum battery voltage |
 | `battery_max` | number | `14.5` | Maximum battery voltage |
+
+
+### Entity name overrides
+
+Most values come from `sensor.<device_name>_<suffix>`, but Genmon's naming is not
+uniform — `system_in_outage` is a **binary_sensor**, and the maintenance counters
+carry a `_due` suffix. The card handles those internally, so the defaults work on a
+stock Genmon install.
+
+If your entity names differ, override individual entities by their card key:
+
+```yaml
+type: custom:generator-hmi-card
+device_name: generator
+entities:
+  system_in_outage: binary_sensor.my_generator_outage_flag
+  battery_voltage: sensor.some_other_battery_sensor
+```
+
+Valid keys are the suffixes the card reads:
+`engine_state`, `switch_state`, `system_in_outage`, `output_voltage`, `utility_voltage`,
+`frequency`, `rpm`, `battery_voltage`, `total_run_hours`, `exercise_time`,
+`oil_and_filter_service_due`, `air_filter_service_due`, `spark_plug_service_due`,
+`battery_service_due`.
+
+An override must be a full `entity_id`; it bypasses `entity_prefix` entirely.
 
 ### Device Name Examples
 

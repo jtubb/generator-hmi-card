@@ -6,7 +6,7 @@
  * @author Claude Code
  */
 
-const CARD_VERSION = '2.3.2';
+const CARD_VERSION = '2.3.3';
 
 console.info(
   `%c GENERATOR-HMI-CARD %c v${CARD_VERSION} %c ISA-101 `,
@@ -85,8 +85,39 @@ class GeneratorHMICard extends HTMLElement {
     };
   }
 
+  // Resolve a card key to a real entity_id.
+  //
+  // Genmon's entity naming is not uniform: most values are sensor.<prefix>_*,
+  // but system_in_outage is a binary_sensor, and the maintenance counters carry
+  // a _due suffix. A single entity_prefix cannot express that, which used to
+  // leave five of the card's fields permanently showing '--'.
+  //
+  // Accepted forms, in priority order:
+  //   1. config.entities[key]         explicit override, wins over everything
+  //   2. "binary_sensor.foo_bar"      a full entity_id, used as-is
+  //   3. "binary_sensor:system_in_outage"
+  //                                   domain-qualified suffix -- swaps the
+  //                                   domain on entity_prefix, keeping the
+  //                                   device name the user configured
+  //   4. "battery_voltage"            plain suffix (original behaviour)
+  _resolveEntity(key) {
+    const colon = key.indexOf(':');
+    const bare = colon === -1 ? key : key.slice(colon + 1);
+
+    const override = this._config.entities && this._config.entities[bare];
+    if (override) return override;
+
+    if (key.includes('.')) return key;
+
+    if (colon !== -1) {
+      const domain = key.slice(0, colon);
+      return this._config.entity_prefix.replace(/^[^.]+\./, domain + '.') + bare;
+    }
+    return this._config.entity_prefix + key;
+  }
+
   _getState(entitySuffix) {
-    const entityId = this._config.entity_prefix + entitySuffix;
+    const entityId = this._resolveEntity(entitySuffix);
     return this._hass?.states[entityId]?.state || '--';
   }
 
@@ -101,7 +132,7 @@ class GeneratorHMICard extends HTMLElement {
   }
 
   _showMoreInfo(entitySuffix) {
-    const entityId = this._config.entity_prefix + entitySuffix;
+    const entityId = this._resolveEntity(entitySuffix);
     const event = new CustomEvent('hass-more-info', {
       bubbles: true,
       composed: true,
@@ -120,7 +151,7 @@ class GeneratorHMICard extends HTMLElement {
   }
 
   _getOutageStatus() {
-    const state = this._getState('system_in_outage').toLowerCase();
+    const state = this._getState('binary_sensor:system_in_outage').toLowerCase();
     if (state === 'yes' || state === 'true' || state === 'on' || (state.includes('outage') && !state.includes('no'))) {
       return { level: 3, text: 'OUTAGE' };
     }
@@ -216,10 +247,10 @@ class GeneratorHMICard extends HTMLElement {
 
     // Maintenance indicators
     if (this._config.show_maintenance) {
-      this._updateMaintenanceIndicator('oil', this._getMaintenanceStatus(this._getState('oil_service')));
-      this._updateMaintenanceIndicator('air-filter', this._getMaintenanceStatus(this._getState('air_filter_service')));
-      this._updateMaintenanceIndicator('spark-plug', this._getMaintenanceStatus(this._getState('spark_plug_service')));
-      this._updateMaintenanceIndicator('battery-svc', this._getMaintenanceStatus(this._getState('battery_service')));
+      this._updateMaintenanceIndicator('oil', this._getMaintenanceStatus(this._getState('oil_and_filter_service_due')));
+      this._updateMaintenanceIndicator('air-filter', this._getMaintenanceStatus(this._getState('air_filter_service_due')));
+      this._updateMaintenanceIndicator('spark-plug', this._getMaintenanceStatus(this._getState('spark_plug_service_due')));
+      this._updateMaintenanceIndicator('battery-svc', this._getMaintenanceStatus(this._getState('battery_service_due')));
     }
 
     // Update button states based on running status
@@ -594,7 +625,7 @@ class GeneratorHMICard extends HTMLElement {
                 <span id="engine-status">--</span>
               </span>
             </div>
-            <div class="status-block clickable" data-entity="system_in_outage">
+            <div class="status-block clickable" data-entity="binary_sensor:system_in_outage">
               <div class="status-label">Utility</div>
               <span class="status-indicator level-0" id="outage-indicator">
                 <span id="outage-status">--</span>
